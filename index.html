@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Orium (Culture + HR) Agent System</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f4fa; min-height: 100vh; padding: 24px 16px; }
+  .wrap { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
+  .hint { text-align: center; font-size: 12px; color: #888; margin-bottom: -4px; }
+  .card { border-radius: 10px; padding: 14px 18px; color: #fff; box-shadow: 0 2px 12px rgba(0,0,0,0.18); }
+  .card-title { background: linear-gradient(135deg, #1a3360ee, #1a3360cc); border: 1px solid #1a3360; text-align: center; padding: 18px 24px; }
+  .card-exp { background: linear-gradient(135deg, #2d5299ee, #2d5299cc); border: 1px solid #2d5299; text-align: center; }
+  .card-orch { background: linear-gradient(135deg, #1e4080ee, #1e4080cc); border: 1px solid #1e4080; text-align: center; }
+  .card-domain-p1 { background: linear-gradient(135deg, #2d5299ee, #2d5299cc); border: 2px solid #7fa8e8; padding: 14px; }
+  .card-domain-p1-highlight { background: linear-gradient(135deg, #1a5c38ee, #1a5c38cc); border: 2px solid #4dbd7d; padding: 14px; }
+  .card-phase2 { background: linear-gradient(135deg, #1a3a6bee, #1a3a6bcc); border: 1px solid #1a3a6b; padding: 14px 18px; }
+  .card-phase3 { background: linear-gradient(135deg, #142d5aee, #142d5acc); border: 1px solid #142d5a; padding: 14px 18px; }
+  .card-wf { background: linear-gradient(135deg, #142d5aee, #142d5acc); border: 1px solid #142d5a; text-align: center; padding: 16px 20px; }
+  .card-cp { background: linear-gradient(135deg, #0d1f3cee, #0d1f3ccc); border: 1px solid #0d1f3c; text-align: center; padding: 14px 20px; }
+  .card-personalization { background: linear-gradient(135deg, #3a6b4aee, #3a6b4acc); border: 1px solid #3a6b4a; text-align: center; padding: 16px 20px; }
+  .card-shareback { background: linear-gradient(135deg, #6b3a5aee, #6b3a5acc); border: 1px solid #6b3a5a; text-align: center; padding: 16px 20px; }
+  .card-spine { background: linear-gradient(135deg, #5a4a1aee, #5a4a1acc); border: 1px solid #5a4a1a; text-align: center; padding: 16px 20px; }
+  .grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .pill { background: rgba(255,255,255,0.18); border-radius: 20px; padding: 4px 14px; font-size: 13px; font-weight: 500; display: inline-block; }
+  .chip { background: rgba(255,255,255,0.15); border-radius: 6px; padding: 4px 10px; font-size: 12px; display: inline-block; }
+  .chip-cp { background: rgba(255,255,255,0.13); border-radius: 6px; padding: 4px 12px; font-size: 12px; font-weight: 500; display: inline-block; }
+  .chip-wf { background: rgba(255,255,255,0.18); border-radius: 8px; padding: 6px 16px; font-size: 13px; font-weight: 500; display: inline-block; }
+  .flow-box { background: rgba(255,255,255,0.22); border-radius: 6px; padding: 5px 14px; font-weight: 600; font-size: 14px; display: inline-block; }
+  .flow-box-escalate { background: rgba(255,100,100,0.25); border: 1px dashed rgba(255,180,180,0.5); border-radius: 6px; padding: 5px 14px; font-weight: 600; font-size: 13px; display: inline-block; color: #ffd0d0; }
+  .tag { font-size: 12px; opacity: 0.85; background: rgba(255,255,255,0.12); border-radius: 4px; padding: 2px 10px; display: inline-block; }
+  .phase-badge { font-size: 11px; background: rgba(255,255,255,0.2); border-radius: 10px; padding: 2px 8px; white-space: nowrap; display: inline-block; }
+  .launch-badge { font-size: 11px; background: rgba(77,189,125,0.4); border: 1px solid rgba(77,189,125,0.6); border-radius: 10px; padding: 2px 8px; white-space: nowrap; display: inline-block; color: #c8f5e0; font-weight: 600; }
+  .flex-wrap { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .flex-wrap-left { display: flex; flex-wrap: wrap; gap: 8px; }
+  .flex-center { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; }
+  .domain-title { font-weight: 700; font-size: 13px; margin-bottom: 10px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 8px; }
+  .domain-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+  .domain-list li { font-size: 12px; display: flex; align-items: flex-start; gap: 5px; }
+  .dot { margin-top: 4px; min-width: 5px; height: 5px; width: 5px; border-radius: 50%; background: rgba(255,255,255,0.6); flex-shrink: 0; }
+  .dot-green { margin-top: 4px; min-width: 5px; height: 5px; width: 5px; border-radius: 50%; background: #4dbd7d; flex-shrink: 0; }
+  .sec-label { font-weight: 600; font-size: 15px; margin-bottom: 10px; }
+  .sec-title { font-weight: 700; font-size: 20px; letter-spacing: 0.3px; }
+  .cp-title { font-weight: 700; font-size: 15px; letter-spacing: 1px; margin-bottom: 10px; }
+  .wf-title { font-weight: 700; font-size: 15px; margin-bottom: 10px; display: inline-block; }
+  .section-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #7a9acc; margin-bottom: 4px; padding-left: 4px; }
+  .section-label-green { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #4dbd7d; margin-bottom: 4px; padding-left: 4px; }
+  .note { font-size: 11px; color: rgba(255,255,255,0.55); font-style: italic; margin-top: 6px; }
+  .launch-note { font-size: 11px; color: #c8f5e0; font-style: italic; margin-top: 6px; }
+  [contenteditable] { outline: none; cursor: pointer; border-bottom: 1px dashed rgba(255,255,255,0.4); }
+  [contenteditable]:focus { background: rgba(255,255,255,0.15); border-radius: 4px; border-bottom: 1px solid #fff; padding: 1px 4px; }
+  .arrow { font-size: 18px; opacity: 0.8; }
+  .phase-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.25); padding-bottom: 8px; }
+  .escalate-note { font-size: 11px; color: #ffd0d0; opacity: 0.9; margin-top: 4px; }
+  .download-btn { position: fixed; bottom: 20px; right: 20px; background: #2d5299; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 600; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 100; }
+  .download-btn:hover { background: #1e4080; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hint">✏️ Click any text to edit</div>
+
+  <!-- Title -->
+  <div class="card card-title">
+    <div class="sec-title" contenteditable="true">Orium (Culture + HR) Agent System</div>
+  </div>
+
+  <!-- Experience Layer -->
+  <div class="card card-exp">
+    <div class="sec-label" contenteditable="true">Experience Layer (Human Entry Points)</div>
+    <div class="flex-wrap">
+      <span class="pill" contenteditable="true">Candidates</span>
+      <span class="pill" contenteditable="true">Employees</span>
+      <span class="pill" contenteditable="true">Managers</span>
+      <span class="pill" contenteditable="true">Recruiters</span>
+      <span class="pill" contenteditable="true">Culture</span>
+      <span class="pill" contenteditable="true">HR</span>
+      <span class="pill" contenteditable="true">LT Members</span>
+    </div>
+  </div>
+
+  <!-- Orchestration Layer -->
+  <div class="card card-orch">
+    <div class="sec-label" contenteditable="true">Orchestration Layer</div>
+    <div class="flex-center" style="margin-bottom:10px;">
+      <span class="flow-box" contenteditable="true">Intake Router</span>
+      <span class="arrow">→</span>
+      <span class="flow-box" contenteditable="true">Workflow Orchestrator</span>
+      <span class="arrow">→</span>
+      <span class="flow-box" contenteditable="true">Request Tracker</span>
+    </div>
+    <div class="flex-wrap" style="margin-bottom:10px;">
+      <span class="tag" contenteditable="true">Intent + Risk Scoring</span>
+      <span class="tag" contenteditable="true">Sequence + SLA</span>
+      <span class="tag" contenteditable="true">Status + Handoff</span>
+    </div>
+    <div style="border-top: 1px dashed rgba(255,180,180,0.35); padding-top:10px;">
+      <div class="escalate-note">↳ Escalation Branch — triggered by risk score or topic sensitivity</div>
+      <div class="flex-center" style="margin-top:6px; gap:8px;">
+        <span class="flow-box-escalate" contenteditable="true">Human Handoff Trigger</span>
+        <span class="arrow" style="color:#ffd0d0;">→</span>
+        <span class="flow-box-escalate" contenteditable="true">HR / Culture Team Routing</span>
+        <span class="arrow" style="color:#ffd0d0;">→</span>
+        <span class="flow-box-escalate" contenteditable="true">Resolution Tracking</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 1 — Launch Agents -->
+  <div class="section-label-green">🚀 Phase 1 — Launch Agents (Start Here)</div>
+  <div class="grid2">
+    <div class="card card-domain-p1-highlight">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.25);padding-bottom:8px;">
+        <span style="font-weight:700;font-size:14px;" contenteditable="true">Manager Support</span>
+        <span class="launch-badge">Ready to Build</span>
+      </div>
+      <ul class="domain-list">
+        <li><span class="dot-green"></span><span contenteditable="true">1:1 Prep &amp; Coaching</span></li>
+        <li><span class="dot-green"></span><span contenteditable="true">Feedback Guidance</span></li>
+        <li><span class="dot-green"></span><span contenteditable="true">Performance Conversations</span></li>
+        <li><span class="dot-green"></span><span contenteditable="true">Team Health Signals</span></li>
+        <li><span class="dot-green"></span><span contenteditable="true">Change Leadership</span></li>
+        <li><span class="dot-green"></span><span contenteditable="true">Growth &amp; Career Coaching</span></li>
+      </ul>
+      <div class="launch-note">↳ Coaching Q&amp;A + heuristics already structured — strongest foundation to build on</div>
+    </div>
+    <div class="card card-domain-p1-highlight">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.25);padding-bottom:8px;">
+        <span style="font-weight:700;font-size:14px;" contenteditable="true">HR Ops, Policy &amp; Benefits</span>
+        <span class="launch-badge">Ready to Build</span>
+      </div>
+      <ul class="domain-list">
+        <li><span class="dot-green"></span><span contenteditable="true">Policy Q&amp;A</span></li>
+        <li><span class="dot-green"></span><span contenteditable="true">Benefits Guidance</span></li>
+        <li><span class="dot-green"></span><span contenteditable="true">HR Process Navigation</span></li>
+        <li><span class="dot-green"></span><span contenteditable="true">Leave &amp; Vacation Support</span></li>
+      </ul>
+      <div class="launch-note">↳ High-volume, structured, low-risk — ideal second agent to prove value fast</div>
+    </div>
+  </div>
+
+  <!-- Phase 1 — Recruitment -->
+  <div class="section-label" style="padding-left:4px;">Phase 1 — Recruitment (Scoped Entry)</div>
+  <div class="grid2">
+    <div class="card card-domain-p1">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.25);padding-bottom:8px;">
+        <span style="font-weight:700;font-size:13px;" contenteditable="true">Recruitment — Phase 1</span>
+      </div>
+      <ul class="domain-list">
+        <li><span class="dot"></span><span contenteditable="true">Job Requisition Support</span></li>
+        <li><span class="dot"></span><span contenteditable="true">Interview Design</span></li>
+      </ul>
+      <div class="note">↳ Narrow scope intentional — high value, lower complexity to start</div>
+    </div>
+    <div class="card card-domain-p1">
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.25);padding-bottom:8px;">
+        <span style="font-weight:700;font-size:13px;" contenteditable="true">Onboarding — Phase 1</span>
+      </div>
+      <ul class="domain-list">
+        <li><span class="dot"></span><span contenteditable="true">Onboarding Orchestration</span></li>
+        <li><span class="dot"></span><span contenteditable="true">First Week Guide</span></li>
+        <li><span class="dot"></span><span contenteditable="true">Systems &amp; Tools Navigation</span></li>
+      </ul>
+      <div class="note">↳ Closely tied to HR Ops — natural extension once Phase 1 is stable</div>
+    </div>
+  </div>
+
+  <!-- Phase 2 -->
+  <div class="section-label" style="padding-left:4px;">Phase 2 — Growth &amp; Employee Experience</div>
+  <div class="grid3">
+    <div class="card card-phase2">
+      <div class="phase-header">
+        <span style="font-weight:700;font-size:13px;" contenteditable="true">Learning, Growth &amp; Development</span>
+      </div>
+      <div class="flex-wrap-left">
+        <span class="chip" contenteditable="true">Career Path Navigator</span>
+        <span class="chip" contenteditable="true">Development Planning</span>
+        <span class="chip" contenteditable="true">Skill Gap Identification</span>
+        <span class="chip" contenteditable="true">Learning Recommendations</span>
+      </div>
+    </div>
+    <div class="card card-phase2">
+      <div class="phase-header">
+        <span style="font-weight:700;font-size:13px;" contenteditable="true">Employee Support &amp; Journey</span>
+      </div>
+      <div class="flex-wrap-left">
+        <span class="chip" contenteditable="true">Recognition &amp; Moments</span>
+        <span class="chip" contenteditable="true">Culture Guide</span>
+        <span class="chip" contenteditable="true">Collaboration Coaching</span>
+        <span class="chip" contenteditable="true">Lifecycle Support</span>
+      </div>
+    </div>
+    <div class="card card-phase2">
+      <div class="phase-header">
+        <span style="font-weight:700;font-size:13px;" contenteditable="true">Recruitment — Phase 2</span>
+      </div>
+      <div class="flex-wrap-left">
+        <span class="chip" contenteditable="true">Sourcing Strategy</span>
+        <span class="chip" contenteditable="true">Candidate Assessment</span>
+        <span class="chip" contenteditable="true">Ramp Planning</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 3 -->
+  <div class="section-label" style="padding-left:4px;">Phase 3 — Intelligence &amp; Personalization</div>
+  <div class="grid3">
+    <div class="card card-phase3">
+      <div class="phase-header">
+        <span style="font-weight:700;font-size:13px;" contenteditable="true">Workforce Intelligence</span>
+      </div>
+      <div class="flex-wrap-left">
+        <span class="chip" contenteditable="true">Capacity Planning</span>
+        <span class="chip" contenteditable="true">Talent Insights</span>
+        <span class="chip" contenteditable="true">Skills Architecture</span>
+        <span class="chip" contenteditable="true">Attrition Signals</span>
+        <span class="chip" contenteditable="true">Skills Gap Analysis</span>
+      </div>
+    </div>
+    <div class="card card-phase3">
+      <div class="phase-header">
+        <span style="font-weight:700;font-size:13px;" contenteditable="true">Recruitment — Phase 3</span>
+      </div>
+      <div class="flex-wrap-left">
+        <span class="chip" contenteditable="true">Market &amp; Role Mapping</span>
+        <span class="chip" contenteditable="true">Sourcing Intelligence</span>
+      </div>
+    </div>
+    <div class="card card-phase3">
+      <div class="phase-header">
+        <span style="font-weight:700;font-size:13px;" contenteditable="true">Onboarding — Phase 3</span>
+      </div>
+      <div class="flex-wrap-left">
+        <span class="chip" contenteditable="true">Cross-Cultural Onboarding</span>
+        <span class="chip" contenteditable="true">Personalized Ramp Plans</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Personalization Layer -->
+  <div class="card card-personalization">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;">
+      <span class="wf-title" contenteditable="true">Personalization Layer</span>
+      <span class="phase-badge">Phase 3</span>
+    </div>
+    <div class="flex-wrap" style="margin-bottom:6px;">
+      <span class="chip-wf" contenteditable="true">Role &amp; Tenure Context</span>
+      <span class="chip-wf" contenteditable="true">Employee Profile</span>
+      <span class="chip-wf" contenteditable="true">Interaction History</span>
+      <span class="chip-wf" contenteditable="true">Explicit Preferences</span>
+      <span class="chip-wf" contenteditable="true">Communication Style</span>
+    </div>
+    <div class="note">↳ Data logging foundations laid in Phase 1 — full personalization activates in Phase 3</div>
+  </div>
+
+  <!-- Data Spine -->
+  <div class="card card-spine">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;">
+      <span class="wf-title" contenteditable="true">Data Spine</span>
+      <span class="phase-badge">Phase 3</span>
+    </div>
+    <div class="flex-wrap" style="margin-bottom:6px;">
+      <span class="chip-wf" contenteditable="true">Adaptive Learning</span>
+      <span class="chip-wf" contenteditable="true">Anonymized Insights</span>
+      <span class="chip-wf" contenteditable="true">Cross-Agent Coordination</span>
+      <span class="chip-wf" contenteditable="true">Coaching Signal Triggers</span>
+    </div>
+    <div class="note">↳ Plumbing laid in Phase 1 — full coordination activates in Phase 3</div>
+  </div>
+
+  <!-- Data Shareback -->
+  <div class="card card-shareback">
+    <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:10px;">
+      <span class="wf-title" contenteditable="true">Data Shareback / Admin Layer</span>
+    </div>
+    <div class="flex-wrap">
+      <span class="chip-wf" contenteditable="true">Usage Reports</span>
+      <span class="chip-wf" contenteditable="true">Insight Exports</span>
+      <span class="chip-wf" contenteditable="true">Admin Dashboard</span>
+      <span class="chip-wf" contenteditable="true">Alerts &amp; Digests</span>
+    </div>
+  </div>
+
+  <!-- Shared Control Plane -->
+  <div class="card card-cp">
+    <div class="cp-title" contenteditable="true">Shared Control Plane</div>
+    <div class="flex-wrap">
+      <span class="chip-cp" contenteditable="true">Identity &amp; Permissions</span>
+      <span class="chip-cp" contenteditable="true">Knowledge Retrieval</span>
+      <span class="chip-cp" contenteditable="true">Memory Store</span>
+      <span class="chip-cp" contenteditable="true">Prompt Registry</span>
+      <span class="chip-cp" contenteditable="true">Evaluation &amp; Quality</span>
+      <span class="chip-cp" contenteditable="true">Audit</span>
+      <span class="chip-cp" contenteditable="true">Risk Guardrails</span>
+      <span class="chip-cp" contenteditable="true">Human Approval</span>
+    </div>
+  </div>
+</div>
+
+<button class="download-btn" onclick="downloadHTML()">⬇ Download HTML</button>
+
+<script>
+function downloadHTML() {
+  const clone = document.documentElement.cloneNode(true);
+  const btn = clone.querySelector('.download-btn');
+  if (btn) btn.remove();
+  const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+  const blob = new Blob([html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'orium-culture-hr-agent-system.html';
+  a.click();
+}
+</script>
+</body>
+</html>
